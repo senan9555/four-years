@@ -2,25 +2,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const scenes = document.querySelectorAll(".scene");
   const progressBar = document.getElementById("progressBar");
+  const chapterCounter = document.getElementById("chapterCounter");
   const music = document.getElementById("music");
 
   let musicStarted = false;
   let musicFadeStarted = false;
   let scrollHintHidden = false;
+  let currentScene = 0;
 
 
-  /* ================================
+  /* =========================
      MUSIC
-  ================================ */
+  ========================= */
 
   function startMusic() {
 
-    if (!music || musicStarted) {
-      return;
-    }
+    if (!music || musicStarted) return;
 
     musicStarted = true;
-
     music.volume = 0;
 
     const playPromise = music.play();
@@ -29,36 +28,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
       playPromise
         .then(() => {
-
           fadeVolume(0, 0.55, 1800);
-
         })
         .catch(() => {
-
-          /*
-            If the browser still blocks playback,
-            allow another user interaction to try again.
-          */
-
           musicStarted = false;
-
         });
+
     }
   }
 
 
   function fadeVolume(from, to, duration) {
 
+    if (!music) return;
+
     const start = performance.now();
 
     function animate(time) {
 
       const elapsed = time - start;
-
-      const progress = Math.min(
-        elapsed / duration,
-        1
-      );
+      const progress = Math.min(elapsed / duration, 1);
 
       music.volume =
         from + (to - from) * progress;
@@ -74,9 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function fadeOutMusic() {
 
-    if (!music || musicFadeStarted) {
-      return;
-    }
+    if (!music || musicFadeStarted) return;
 
     musicFadeStarted = true;
 
@@ -87,11 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function animate(time) {
 
       const elapsed = time - start;
-
-      const progress = Math.min(
-        elapsed / duration,
-        1
-      );
+      const progress = Math.min(elapsed / duration, 1);
 
       music.volume =
         startVolume * (1 - progress);
@@ -111,12 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ================================
-     USER INTERACTION
-     This is what makes mobile
-     audio playback reliable.
-  ================================ */
-
   function userStartedInteraction() {
 
     if (!musicStarted) {
@@ -130,32 +107,23 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener(
     "touchstart",
     userStartedInteraction,
-    {
-      passive: true,
-      once: false
-    }
+    { passive: true }
   );
-
 
   document.addEventListener(
     "pointerdown",
     userStartedInteraction,
-    {
-      passive: true,
-      once: false
-    }
+    { passive: true }
   );
 
 
-  /* ================================
+  /* =========================
      SCROLL HINT
-  ================================ */
+  ========================= */
 
   function hideScrollHint() {
 
-    if (scrollHintHidden) {
-      return;
-    }
+    if (scrollHintHidden) return;
 
     if (window.scrollY > 15) {
 
@@ -168,76 +136,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  window.addEventListener(
-    "scroll",
-    () => {
-
-      hideScrollHint();
-
-      updateProgress();
-
-    },
-    {
-      passive: true
-    }
-  );
-
-
-  /* ================================
-     SCENE REVEAL
-  ================================ */
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-
-      entries.forEach((entry) => {
-
-        if (!entry.isIntersecting) {
-          return;
-        }
-
-        entry.target.classList.add("visible");
-
-        const index =
-          Array.from(scenes).indexOf(entry.target);
-
-
-        /*
-          Fade music near the final scene.
-        */
-
-        if (
-          index === scenes.length - 1 &&
-          !musicFadeStarted
-        ) {
-
-          fadeOutMusic();
-
-        }
-
-      });
-
-    },
-    {
-      threshold: 0.45
-    }
-  );
-
-
-  scenes.forEach((scene) => {
-    observer.observe(scene);
-  });
-
-
-  /* ================================
-     PROGRESS BAR
-  ================================ */
+  /* =========================
+     PROGRESS
+  ========================= */
 
   function updateProgress() {
 
     const scrollTop =
-      window.scrollY ||
-      window.pageYOffset;
+      window.scrollY || window.pageYOffset;
 
     const documentHeight =
       document.documentElement.scrollHeight -
@@ -246,7 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (documentHeight <= 0) {
 
       progressBar.style.width = "0%";
-
       return;
     }
 
@@ -258,14 +163,98 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ================================
-     INITIAL SCENE
-  ================================ */
+  /* =========================
+     CHAPTER COUNTER
+  ========================= */
 
-  if (scenes.length > 0) {
-    scenes[0].classList.add("visible");
+  function updateChapter(index) {
+
+    if (!chapterCounter) return;
+
+    const number =
+      String(index + 1).padStart(2, "0");
+
+    chapterCounter.textContent =
+      `${number} / ${String(scenes.length).padStart(2, "0")}`;
   }
 
+
+  /* =========================
+     SCENE OBSERVER
+  ========================= */
+
+  const observer =
+    new IntersectionObserver(
+      (entries) => {
+
+        entries.forEach((entry) => {
+
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("visible");
+
+          const index =
+            Array.from(scenes).indexOf(entry.target);
+
+          if (index !== -1) {
+
+            currentScene = index;
+
+            updateChapter(index);
+          }
+
+          /*
+             Fade music on final scene
+          */
+
+          if (
+            index === scenes.length - 1 &&
+            !musicFadeStarted
+          ) {
+
+            fadeOutMusic();
+          }
+
+        });
+
+      },
+      {
+        threshold: 0.45
+      }
+    );
+
+
+  scenes.forEach((scene) => {
+    observer.observe(scene);
+  });
+
+
+  /* =========================
+     SCROLL
+  ========================= */
+
+  window.addEventListener(
+    "scroll",
+    () => {
+
+      hideScrollHint();
+      updateProgress();
+
+    },
+    { passive: true }
+  );
+
+
+  /* =========================
+     INITIAL STATE
+  ========================= */
+
+  if (scenes.length > 0) {
+
+    scenes[0].classList.add("visible");
+
+    updateChapter(0);
+  }
 
   updateProgress();
 
