@@ -6,65 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let musicStarted = false;
   let musicFadeStarted = false;
+  let scrollHintHidden = false;
 
 
   /* ================================
-     SCENE REVEAL
-  ================================ */
-
-  const observer = new IntersectionObserver(
-    (entries) => {
-
-      entries.forEach((entry) => {
-
-        if (!entry.isIntersecting) {
-          return;
-        }
-
-        entry.target.classList.add("visible");
-
-        const index = Array.from(scenes).indexOf(entry.target);
-
-
-        /* ================================
-           START MUSIC
-           Music starts after the user
-           begins moving through the story.
-        ================================ */
-
-        if (!musicStarted && index > 0) {
-          startMusic();
-        }
-
-
-        /* ================================
-           FINAL SCENE
-           Fade music near the ending.
-        ================================ */
-
-        if (
-          index === scenes.length - 1 &&
-          !musicFadeStarted
-        ) {
-          fadeOutMusic();
-        }
-
-      });
-
-    },
-    {
-      threshold: 0.45
-    }
-  );
-
-
-  scenes.forEach((scene) => {
-    observer.observe(scene);
-  });
-
-
-  /* ================================
-     MUSIC START
+     MUSIC
   ================================ */
 
   function startMusic() {
@@ -84,31 +30,22 @@ document.addEventListener("DOMContentLoaded", () => {
       playPromise
         .then(() => {
 
-          fadeVolume(
-            0,
-            0.55,
-            1800
-          );
+          fadeVolume(0, 0.55, 1800);
 
         })
         .catch(() => {
 
           /*
-            Some mobile browsers may block
-            playback in certain situations.
+            If the browser still blocks playback,
+            allow another user interaction to try again.
           */
 
           musicStarted = false;
 
         });
-
     }
   }
 
-
-  /* ================================
-     MUSIC FADE IN
-  ================================ */
 
   function fadeVolume(from, to, duration) {
 
@@ -123,24 +60,17 @@ document.addEventListener("DOMContentLoaded", () => {
         1
       );
 
-      const value =
+      music.volume =
         from + (to - from) * progress;
-
-      music.volume = value;
 
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
-
     }
 
     requestAnimationFrame(animate);
   }
 
-
-  /* ================================
-     MUSIC FADE OUT
-  ================================ */
 
   function fadeOutMusic() {
 
@@ -175,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
         music.pause();
         music.currentTime = 0;
       }
-
     }
 
     requestAnimationFrame(animate);
@@ -183,7 +112,125 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ================================
-     SCROLL PROGRESS
+     USER INTERACTION
+     This is what makes mobile
+     audio playback reliable.
+  ================================ */
+
+  function userStartedInteraction() {
+
+    if (!musicStarted) {
+      startMusic();
+    }
+
+    hideScrollHint();
+  }
+
+
+  document.addEventListener(
+    "touchstart",
+    userStartedInteraction,
+    {
+      passive: true,
+      once: false
+    }
+  );
+
+
+  document.addEventListener(
+    "pointerdown",
+    userStartedInteraction,
+    {
+      passive: true,
+      once: false
+    }
+  );
+
+
+  /* ================================
+     SCROLL HINT
+  ================================ */
+
+  function hideScrollHint() {
+
+    if (scrollHintHidden) {
+      return;
+    }
+
+    if (window.scrollY > 15) {
+
+      scrollHintHidden = true;
+
+      document.body.classList.add(
+        "has-started-scrolling"
+      );
+    }
+  }
+
+
+  window.addEventListener(
+    "scroll",
+    () => {
+
+      hideScrollHint();
+
+      updateProgress();
+
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  /* ================================
+     SCENE REVEAL
+  ================================ */
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+
+      entries.forEach((entry) => {
+
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        entry.target.classList.add("visible");
+
+        const index =
+          Array.from(scenes).indexOf(entry.target);
+
+
+        /*
+          Fade music near the final scene.
+        */
+
+        if (
+          index === scenes.length - 1 &&
+          !musicFadeStarted
+        ) {
+
+          fadeOutMusic();
+
+        }
+
+      });
+
+    },
+    {
+      threshold: 0.45
+    }
+  );
+
+
+  scenes.forEach((scene) => {
+    observer.observe(scene);
+  });
+
+
+  /* ================================
+     PROGRESS BAR
   ================================ */
 
   function updateProgress() {
@@ -211,46 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  window.addEventListener(
-    "scroll",
-    updateProgress,
-    { passive: true }
-  );
-
-  updateProgress();
-
-
-  /* ================================
-     SCROLL HINT
-     Hide the ↓ once the user
-     actually starts scrolling.
-  ================================ */
-
-  let scrollHintHidden = false;
-
-  function hideScrollHint() {
-
-    if (scrollHintHidden) {
-      return;
-    }
-
-    if (window.scrollY > 15) {
-
-      scrollHintHidden = true;
-
-      document.body.classList.add(
-        "has-started-scrolling"
-      );
-    }
-  }
-
-  window.addEventListener(
-    "scroll",
-    hideScrollHint,
-    { passive: true }
-  );
-
-
   /* ================================
      INITIAL SCENE
   ================================ */
@@ -258,5 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (scenes.length > 0) {
     scenes[0].classList.add("visible");
   }
+
+
+  updateProgress();
 
 });
