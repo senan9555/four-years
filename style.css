@@ -2,7 +2,6 @@
   --bg: #f7f5ef;
   --text: #292823;
   --muted: #77736b;
-  --soft: #aaa59b;
   --line: rgba(41, 40, 35, 0.16);
 
   --serif: "Cormorant Garamond", Georgia, serif;
@@ -16,8 +15,8 @@
 }
 
 html {
-  scroll-behavior: smooth;
   background: var(--bg);
+  scroll-behavior: smooth;
 }
 
 body {
@@ -29,9 +28,9 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* --------------------------------
+/* ================================
    PROGRESS
--------------------------------- */
+================================ */
 
 .progress {
   position: fixed;
@@ -50,9 +49,9 @@ body {
   transition: width 0.15s ease-out;
 }
 
-/* --------------------------------
-   STORY
--------------------------------- */
+/* ================================
+   SCENES
+================================ */
 
 #story {
   width: 100%;
@@ -60,11 +59,13 @@ body {
 
 .scene {
   position: relative;
-  min-height: 100svh;
   width: 100%;
+  min-height: 100svh;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   padding: 90px 28px;
 }
 
@@ -72,8 +73,10 @@ body {
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
+
   opacity: 0;
   transform: translateY(18px);
+
   transition:
     opacity 0.9s ease,
     transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
@@ -84,9 +87,9 @@ body {
   transform: translateY(0);
 }
 
-/* --------------------------------
+/* ================================
    TYPOGRAPHY
--------------------------------- */
+================================ */
 
 h1,
 h2,
@@ -102,26 +105,25 @@ h1 {
 }
 
 h2 {
+  font-family: var(--serif);
   font-size: clamp(32px, 8vw, 48px);
   line-height: 1.03;
   letter-spacing: -0.02em;
+
   margin-bottom: 30px;
 }
 
 p {
+  font-family: var(--serif);
   font-size: clamp(21px, 5.2vw, 27px);
   line-height: 1.42;
   letter-spacing: -0.008em;
+
   margin-bottom: 28px;
 }
 
 p:last-child {
   margin-bottom: 0;
-}
-
-.emphasis {
-  font-weight: 500;
-  margin-top: 42px;
 }
 
 strong {
@@ -132,17 +134,38 @@ em {
   font-style: italic;
 }
 
+.emphasis {
+  font-weight: 500;
+  margin-top: 42px;
+}
+
 .quote {
   font-size: clamp(24px, 6vw, 31px);
   line-height: 1.25;
+
   margin: 38px 0;
   padding-left: 18px;
+
   border-left: 1px solid var(--line);
 }
 
-/* --------------------------------
+/* ================================
+   CENTER
+================================ */
+
+.center {
+  text-align: center;
+}
+
+.center p {
+  max-width: 430px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ================================
    OPENING
--------------------------------- */
+================================ */
 
 .scene-date {
   min-height: 100svh;
@@ -153,7 +176,9 @@ em {
   font-size: 14px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+
   color: var(--muted);
+
   margin-bottom: 20px;
 }
 
@@ -163,23 +188,9 @@ em {
   color: var(--text);
 }
 
-/* --------------------------------
-   CENTERED SCENES
--------------------------------- */
-
-.center {
-  text-align: center;
-}
-
-.center p {
-  max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* --------------------------------
+/* ================================
    CONFESSION
--------------------------------- */
+================================ */
 
 .confession {
   min-height: 110svh;
@@ -192,22 +203,26 @@ em {
 
 .confession p {
   color: var(--muted);
+
   max-width: 430px;
+
   margin-left: auto;
   margin-right: auto;
 }
 
 .love-line {
   font-family: var(--serif);
+
   font-size: clamp(42px, 11vw, 72px);
   line-height: 0.95;
   letter-spacing: -0.03em;
+
   margin-top: 30px;
 }
 
-/* --------------------------------
+/* ================================
    KEY LINE
--------------------------------- */
+================================ */
 
 .key-line {
   min-height: 110svh;
@@ -221,33 +236,45 @@ em {
   margin-bottom: 0;
 }
 
-/* --------------------------------
-   BOOK
--------------------------------- */
+/* ================================
+   BOOK IMAGE
+================================ */
 
-.book-placeholder {
+.book-image-wrapper {
   width: min(78vw, 300px);
-  aspect-ratio: 0.67;
-  margin: 60px auto 0;
+
+  margin: 58px auto 0;
+
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: #e9e4d9;
-  color: var(--muted);
-  font-family: var(--sans);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  align-items: center;
+
   overflow: hidden;
+
+  background: transparent;
 }
 
-.book-placeholder span {
-  opacity: 0.65;
+.book-image {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  max-height: 430px;
+
+  object-fit: contain;
+
+  border-radius: 2px;
+
+  box-shadow:
+    0 18px 40px rgba(30, 29, 25, 0.12);
+
+  opacity: 0.98;
 }
 
-/* --------------------------------
+/* ================================
    FINAL
--------------------------------- */
+================================ */
 
 .final {
   min-height: 100svh;
@@ -256,20 +283,24 @@ em {
 
 .final h1 {
   font-size: clamp(38px, 9vw, 58px);
+
   max-width: 470px;
+
   margin: 0 auto 45px;
 }
 
 .final-date {
   font-family: var(--sans);
+
   font-size: 12px;
   letter-spacing: 0.2em;
+
   color: var(--muted);
 }
 
-/* --------------------------------
+/* ================================
    MOBILE
--------------------------------- */
+================================ */
 
 @media (max-width: 600px) {
 
@@ -297,14 +328,19 @@ em {
     margin: 32px 0;
   }
 
-  .book-placeholder {
+  .book-image-wrapper {
+    width: min(76vw, 290px);
     margin-top: 45px;
+  }
+
+  .book-image {
+    max-height: 400px;
   }
 }
 
-/* --------------------------------
+/* ================================
    LARGE SCREENS
--------------------------------- */
+================================ */
 
 @media (min-width: 900px) {
 
@@ -320,11 +356,15 @@ em {
   p {
     font-size: 27px;
   }
+
+  .book-image-wrapper {
+    width: 300px;
+  }
 }
 
-/* --------------------------------
+/* ================================
    REDUCED MOTION
--------------------------------- */
+================================ */
 
 @media (prefers-reduced-motion: reduce) {
 
