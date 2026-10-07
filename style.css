@@ -502,3 +502,8 @@ em {
     opacity: 0.65;
   }
 }
+body.has-started-scrolling .scene-date::after {
+  opacity: 0 !important;
+  animation: none;
+  transition: opacity 0.5s ease;
+}
