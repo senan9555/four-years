@@ -1,0 +1,344 @@
+:root {
+  --bg: #f7f5ef;
+  --text: #292823;
+  --muted: #77736b;
+  --soft: #aaa59b;
+  --line: rgba(41, 40, 35, 0.16);
+
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --sans: "Inter", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* --------------------------------
+   PROGRESS
+-------------------------------- */
+
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: transparent;
+  z-index: 1000;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: rgba(41, 40, 35, 0.55);
+  transition: width 0.15s ease-out;
+}
+
+/* --------------------------------
+   STORY
+-------------------------------- */
+
+#story {
+  width: 100%;
+}
+
+.scene {
+  position: relative;
+  min-height: 100svh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 90px 28px;
+}
+
+.content {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scene.visible .content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --------------------------------
+   TYPOGRAPHY
+-------------------------------- */
+
+h1,
+h2,
+p {
+  font-weight: 400;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(38px, 10vw, 62px);
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: clamp(32px, 8vw, 48px);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+  margin-bottom: 30px;
+}
+
+p {
+  font-size: clamp(21px, 5.2vw, 27px);
+  line-height: 1.42;
+  letter-spacing: -0.008em;
+  margin-bottom: 28px;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+.emphasis {
+  font-weight: 500;
+  margin-top: 42px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+em {
+  font-style: italic;
+}
+
+.quote {
+  font-size: clamp(24px, 6vw, 31px);
+  line-height: 1.25;
+  margin: 38px 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--line);
+}
+
+/* --------------------------------
+   OPENING
+-------------------------------- */
+
+.scene-date {
+  min-height: 100svh;
+}
+
+.date {
+  font-family: var(--sans);
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-family: var(--serif);
+  font-size: clamp(25px, 6vw, 34px);
+  color: var(--text);
+}
+
+/* --------------------------------
+   CENTERED SCENES
+-------------------------------- */
+
+.center {
+  text-align: center;
+}
+
+.center p {
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --------------------------------
+   CONFESSION
+-------------------------------- */
+
+.confession {
+  min-height: 110svh;
+}
+
+.confession h1 {
+  font-size: clamp(34px, 8vw, 52px);
+  margin-bottom: 40px;
+}
+
+.confession p {
+  color: var(--muted);
+  max-width: 430px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.love-line {
+  font-family: var(--serif);
+  font-size: clamp(42px, 11vw, 72px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin-top: 30px;
+}
+
+/* --------------------------------
+   KEY LINE
+-------------------------------- */
+
+.key-line {
+  min-height: 110svh;
+}
+
+.key-line h1 {
+  margin-bottom: 55px;
+}
+
+.key-line h1:last-child {
+  margin-bottom: 0;
+}
+
+/* --------------------------------
+   BOOK
+-------------------------------- */
+
+.book-placeholder {
+  width: min(78vw, 300px);
+  aspect-ratio: 0.67;
+  margin: 60px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9e4d9;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.book-placeholder span {
+  opacity: 0.65;
+}
+
+/* --------------------------------
+   FINAL
+-------------------------------- */
+
+.final {
+  min-height: 100svh;
+  padding-bottom: 120px;
+}
+
+.final h1 {
+  font-size: clamp(38px, 9vw, 58px);
+  max-width: 470px;
+  margin: 0 auto 45px;
+}
+
+.final-date {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+/* --------------------------------
+   MOBILE
+-------------------------------- */
+
+@media (max-width: 600px) {
+
+  .scene {
+    padding: 80px 25px;
+  }
+
+  .content {
+    max-width: 100%;
+  }
+
+  h2 {
+    margin-bottom: 27px;
+  }
+
+  p {
+    margin-bottom: 25px;
+  }
+
+  .emphasis {
+    margin-top: 36px;
+  }
+
+  .quote {
+    margin: 32px 0;
+  }
+
+  .book-placeholder {
+    margin-top: 45px;
+  }
+}
+
+/* --------------------------------
+   LARGE SCREENS
+-------------------------------- */
+
+@media (min-width: 900px) {
+
+  .scene {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .content {
+    max-width: 560px;
+  }
+
+  p {
+    font-size: 27px;
+  }
+}
+
+/* --------------------------------
+   REDUCED MOTION
+-------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  .content {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .progress-bar {
+    transition: none;
+  }
+}
