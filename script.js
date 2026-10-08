@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const scenes = document.querySelectorAll(".scene");
   const progressBar = document.getElementById("progressBar");
   const chapterCounter = document.getElementById("chapterCounter");
@@ -8,16 +7,14 @@ document.addEventListener("DOMContentLoaded", () => {
   let musicStarted = false;
   let musicFadeStarted = false;
   let scrollHintHidden = false;
-  let currentScene = 0;
 
-
-  /* =========================
+  /* =====================================================
      MUSIC
-  ========================= */
+     Music starts ONLY after real scrolling begins
+     ===================================================== */
 
   function startMusic() {
-
-    if (!music || musicStarted) return;
+    if (!music || musicStarted || musicFadeStarted) return;
 
     musicStarted = true;
     music.volume = 0;
@@ -25,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const playPromise = music.play();
 
     if (playPromise !== undefined) {
-
       playPromise
         .then(() => {
           fadeVolume(0, 0.55, 1800);
@@ -33,24 +29,19 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(() => {
           musicStarted = false;
         });
-
     }
   }
 
-
   function fadeVolume(from, to, duration) {
-
     if (!music) return;
 
     const start = performance.now();
 
     function animate(time) {
-
       const elapsed = time - start;
       const progress = Math.min(elapsed / duration, 1);
 
-      music.volume =
-        from + (to - from) * progress;
+      music.volume = from + (to - from) * progress;
 
       if (progress < 1) {
         requestAnimationFrame(animate);
@@ -60,9 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(animate);
   }
 
-
   function fadeOutMusic() {
-
     if (!music || musicFadeStarted) return;
 
     musicFadeStarted = true;
@@ -72,19 +61,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const start = performance.now();
 
     function animate(time) {
-
       const elapsed = time - start;
       const progress = Math.min(elapsed / duration, 1);
 
-      music.volume =
-        startVolume * (1 - progress);
+      music.volume = startVolume * (1 - progress);
 
       if (progress < 1) {
-
         requestAnimationFrame(animate);
-
       } else {
-
         music.pause();
         music.currentTime = 0;
       }
@@ -94,168 +78,158 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  function userStartedInteraction() {
+  /* =====================================================
+     SCROLL START
+     ===================================================== */
 
-    if (!musicStarted) {
+  function handleScrollStart() {
+    if (window.scrollY > 5) {
       startMusic();
+      hideScrollHint();
     }
-
-    hideScrollHint();
   }
 
 
-  document.addEventListener(
-    "touchstart",
-    userStartedInteraction,
-    { passive: true }
-  );
-
-  document.addEventListener(
-    "pointerdown",
-    userStartedInteraction,
-    { passive: true }
-  );
-
-
-  /* =========================
+  /* =====================================================
      SCROLL HINT
-  ========================= */
+     ===================================================== */
 
   function hideScrollHint() {
-
     if (scrollHintHidden) return;
 
     if (window.scrollY > 15) {
-
       scrollHintHidden = true;
-
-      document.body.classList.add(
-        "has-started-scrolling"
-      );
+      document.body.classList.add("has-started-scrolling");
     }
   }
 
 
-  /* =========================
-     PROGRESS
-  ========================= */
+  /* =====================================================
+     PROGRESS BAR
+     ===================================================== */
 
   function updateProgress() {
-
-    const scrollTop =
-      window.scrollY || window.pageYOffset;
+    const scrollTop = window.scrollY || window.pageYOffset;
 
     const documentHeight =
-      document.documentElement.scrollHeight -
-      window.innerHeight;
+      document.documentElement.scrollHeight - window.innerHeight;
 
     if (documentHeight <= 0) {
-
       progressBar.style.width = "0%";
       return;
     }
 
-    const progress =
-      (scrollTop / documentHeight) * 100;
+    const progress = (scrollTop / documentHeight) * 100;
 
     progressBar.style.width =
       `${Math.min(progress, 100)}%`;
   }
 
 
-  /* =========================
+  /* =====================================================
      CHAPTER COUNTER
-  ========================= */
+     ===================================================== */
 
   function updateChapter(index) {
-
     if (!chapterCounter) return;
 
     const number =
       String(index + 1).padStart(2, "0");
 
+    const total =
+      String(scenes.length).padStart(2, "0");
+
     chapterCounter.textContent =
-      `${number} / ${String(scenes.length).padStart(2, "0")}`;
+      `${number} / ${total}`;
   }
 
 
-  /* =========================
-     SCENE OBSERVER
-  ========================= */
+  /* =====================================================
+     CURRENT SCENE
+     ===================================================== */
 
-  const observer =
-    new IntersectionObserver(
-      (entries) => {
+  function updateCurrentScene() {
+    if (!scenes.length) return;
 
-        entries.forEach((entry) => {
+    const viewportCenter =
+      window.innerHeight / 2;
 
-          if (!entry.isIntersecting) return;
+    let closestIndex = 0;
+    let closestDistance = Infinity;
 
-          entry.target.classList.add("visible");
+    scenes.forEach((scene, index) => {
+      const rect = scene.getBoundingClientRect();
 
-          const index =
-            Array.from(scenes).indexOf(entry.target);
+      const sceneCenter =
+        rect.top + rect.height / 2;
 
-          if (index !== -1) {
+      const distance =
+        Math.abs(sceneCenter - viewportCenter);
 
-            currentScene = index;
-
-            updateChapter(index);
-          }
-
-          /*
-             Fade music on final scene
-          */
-
-          if (
-            index === scenes.length - 1 &&
-            !musicFadeStarted
-          ) {
-
-            fadeOutMusic();
-          }
-
-        });
-
-      },
-      {
-        threshold: 0.45
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
       }
-    );
+    });
 
+    updateChapter(closestIndex);
+
+    if (
+      closestIndex === scenes.length - 1 &&
+      !musicFadeStarted
+    ) {
+      fadeOutMusic();
+    }
+  }
+
+
+  /* =====================================================
+     SCENE REVEAL
+     ===================================================== */
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        entry.target.classList.add("visible");
+      });
+    },
+    {
+      threshold: 0.35
+    }
+  );
 
   scenes.forEach((scene) => {
     observer.observe(scene);
   });
 
 
-  /* =========================
-     SCROLL
-  ========================= */
+  /* =====================================================
+     SCROLL EVENTS
+     ===================================================== */
 
   window.addEventListener(
     "scroll",
     () => {
-
-      hideScrollHint();
+      handleScrollStart();
       updateProgress();
-
+      updateCurrentScene();
     },
-    { passive: true }
+    {
+      passive: true
+    }
   );
 
 
-  /* =========================
+  /* =====================================================
      INITIAL STATE
-  ========================= */
+     ===================================================== */
 
   if (scenes.length > 0) {
-
     scenes[0].classList.add("visible");
-
     updateChapter(0);
   }
 
   updateProgress();
-
 });
