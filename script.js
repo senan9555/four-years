@@ -8,15 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
   let musicFadeStarted = false;
   let scrollHintHidden = false;
 
+
   /* =====================================================
      MUSIC
-     Music starts ONLY after real scrolling begins
+     Starts on the first REAL swipe / wheel movement
      ===================================================== */
 
   function startMusic() {
     if (!music || musicStarted || musicFadeStarted) return;
 
     musicStarted = true;
+
     music.volume = 0;
 
     const playPromise = music.play();
@@ -32,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+
   function fadeVolume(from, to, duration) {
     if (!music) return;
 
@@ -41,7 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const elapsed = time - start;
       const progress = Math.min(elapsed / duration, 1);
 
-      music.volume = from + (to - from) * progress;
+      music.volume =
+        from + (to - from) * progress;
 
       if (progress < 1) {
         requestAnimationFrame(animate);
@@ -50,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     requestAnimationFrame(animate);
   }
+
 
   function fadeOutMusic() {
     if (!music || musicFadeStarted) return;
@@ -64,7 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const elapsed = time - start;
       const progress = Math.min(elapsed / duration, 1);
 
-      music.volume = startVolume * (1 - progress);
+      music.volume =
+        startVolume * (1 - progress);
 
       if (progress < 1) {
         requestAnimationFrame(animate);
@@ -79,15 +85,78 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =====================================================
-     SCROLL START
+     REAL USER SCROLL
      ===================================================== */
 
-  function handleScrollStart() {
-    if (window.scrollY > 5) {
+  let touchStartY = null;
+
+  document.addEventListener(
+    "touchstart",
+    (event) => {
+      if (!event.touches.length) return;
+
+      touchStartY = event.touches[0].clientY;
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  document.addEventListener(
+    "touchmove",
+    (event) => {
+      if (!event.touches.length) return;
+
+      const currentY = event.touches[0].clientY;
+
+      if (touchStartY === null) {
+        touchStartY = currentY;
+        return;
+      }
+
+      const movement =
+        Math.abs(currentY - touchStartY);
+
+      /*
+        Ignore tiny finger movements.
+        Start music only when an actual swipe begins.
+      */
+
+      if (movement > 8) {
+        startMusic();
+        hideScrollHint();
+      }
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  document.addEventListener(
+    "touchend",
+    () => {
+      touchStartY = null;
+    },
+    {
+      passive: true
+    }
+  );
+
+
+  /* Desktop / mouse wheel */
+
+  document.addEventListener(
+    "wheel",
+    () => {
       startMusic();
       hideScrollHint();
+    },
+    {
+      passive: true
     }
-  }
+  );
 
 
   /* =====================================================
@@ -99,7 +168,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (window.scrollY > 15) {
       scrollHintHidden = true;
-      document.body.classList.add("has-started-scrolling");
+
+      document.body.classList.add(
+        "has-started-scrolling"
+      );
     }
   }
 
@@ -109,17 +181,20 @@ document.addEventListener("DOMContentLoaded", () => {
      ===================================================== */
 
   function updateProgress() {
-    const scrollTop = window.scrollY || window.pageYOffset;
+    const scrollTop =
+      window.scrollY || window.pageYOffset;
 
     const documentHeight =
-      document.documentElement.scrollHeight - window.innerHeight;
+      document.documentElement.scrollHeight -
+      window.innerHeight;
 
     if (documentHeight <= 0) {
       progressBar.style.width = "0%";
       return;
     }
 
-    const progress = (scrollTop / documentHeight) * 100;
+    const progress =
+      (scrollTop / documentHeight) * 100;
 
     progressBar.style.width =
       `${Math.min(progress, 100)}%`;
@@ -158,13 +233,16 @@ document.addEventListener("DOMContentLoaded", () => {
     let closestDistance = Infinity;
 
     scenes.forEach((scene, index) => {
-      const rect = scene.getBoundingClientRect();
+      const rect =
+        scene.getBoundingClientRect();
 
       const sceneCenter =
         rect.top + rect.height / 2;
 
       const distance =
-        Math.abs(sceneCenter - viewportCenter);
+        Math.abs(
+          sceneCenter - viewportCenter
+        );
 
       if (distance < closestDistance) {
         closestDistance = distance;
@@ -187,18 +265,20 @@ document.addEventListener("DOMContentLoaded", () => {
      SCENE REVEAL
      ===================================================== */
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+  const observer =
+    new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-        entry.target.classList.add("visible");
-      });
-    },
-    {
-      threshold: 0.35
-    }
-  );
+          entry.target.classList.add("visible");
+        });
+      },
+      {
+        threshold: 0.35
+      }
+    );
+
 
   scenes.forEach((scene) => {
     observer.observe(scene);
@@ -206,13 +286,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* =====================================================
-     SCROLL EVENTS
+     NORMAL SCROLL
      ===================================================== */
 
   window.addEventListener(
     "scroll",
     () => {
-      handleScrollStart();
+      hideScrollHint();
       updateProgress();
       updateCurrentScene();
     },
